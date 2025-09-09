@@ -10,6 +10,52 @@ from st_aggrid import AgGrid, GridOptionsBuilder
 import requests
 from io import BytesIO
 
+# =============================================
+# 1. SECCIÓN DE AUTENTICACIÓN (AL PRINCIPIO DEL ARCHIVO)
+# =============================================
+
+# Configuración de usuarios y contraseñas
+USUARIOS = {
+    "macier": "911"
+}
+
+def check_auth():
+    """Verifica si el usuario está autenticado"""
+    return st.session_state.get("autenticado", False)
+
+def login():
+    """Muestra el formulario de login"""
+    st.title("🔐 Acceso al Dashboard")
+    with st.form("login_form"):
+        usuario = st.text_input("Usuario")
+        password = st.text_input("Contraseña", type="password")
+        submit = st.form_submit_button("Ingresar")
+        
+        if submit:
+            if usuario in USUARIOS and USUARIOS[usuario] == password:
+                st.session_state["autenticado"] = True
+                st.session_state["usuario"] = usuario
+                st.rerun()  # Recarga la app para mostrar el dashboard
+            else:
+                st.error("❌ Usuario o contraseña incorrectos")
+
+def logout():
+    """Cierra la sesión del usuario"""
+    st.session_state["autenticado"] = False
+    st.session_state["usuario"] = None
+    st.rerun()
+
+# =============================================
+# 2. VERIFICACIÓN DE AUTENTICACIÓN (ANTES DEL DASHBOARD)
+# =============================================
+if not check_auth():
+    login()
+    st.stop()  # Detiene la ejecución si no está autenticado
+
+# =============================================
+# 3. EL RESTO DE TU DASHBOARD (CONTENIDO PROTEGIDO)
+# =============================================
+
 # ----------------------------------------------------------
 # FUNCIÓN PARA ORDENAR CÓDIGOS
 # ----------------------------------------------------------
@@ -703,4 +749,5 @@ st.sidebar.info(f"""
 Pedidos: {fecha_min_p} - {fecha_max_p}  
 Entregas: {fecha_min_e} - {fecha_max_e}  
 Actualizado: {datetime.now().strftime('%d/%m/%Y %H:%M')}
+
 """)
